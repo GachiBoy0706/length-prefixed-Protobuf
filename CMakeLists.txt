@@ -8,11 +8,14 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 
+# Указываем путь к сгенерированным файлам protobuf
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 # Укажите путь к вашим .proto файлам
 set(PROTO_FILES ${CMAKE_CURRENT_SOURCE_DIR}/message.proto)
 
 # Сгенерируйте C++ файлы из .proto
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_BINARY_DIR} ${PROTO_FILES})
 
 # Укажите исходные файлы вашего проекта
 set(SOURCE_FILES main.cpp ${PROTO_SRCS} ${PROTO_HDRS})
