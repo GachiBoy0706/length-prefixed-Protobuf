@@ -9,33 +9,27 @@ template<typename Message>
 std::shared_ptr<Message> parseDelimited(const void* data, size_t size, size_t* bytesConsumed = 0)
 {
 
-
     if (!size) // нечего парсить, data пустая 
     {
-        *bytesConsumed = 0;
-        return nullptr;
+        throw std::runtime_error("Data size equals zero.");
     }
-
     
     // Десериализация сообщения из массива с префиксом длины
-    //здесь надо попробовать static_cast
-    google::protobuf::io::CodedInputStream input_stream(reinterpret_cast<const uint8_t*>(data), size);
+    google::protobuf::io::CodedInputStream input_stream(static_cast<const uint8_t*>(data), size);
     
-    auto initial_position = input_stream.CurrentPosition();
+    auto initial_position = input_stream.CurrentPosition();// для вычисления длины префикса в байтах
     
-    // Чтение префикса длины \\\\\\\\\\\\\\\\\\\\\\\\\\!!!!!!!!!!!!!!!!!!!!!!!!!!/////////////////////////////выжный момент для декодирования у меня
+    // Чтение префикса длины 
     uint32_t message_size;
     if (!input_stream.ReadVarint32(&message_size)) {
-        *bytesConsumed = 0;
-        return nullptr;
+        throw std::runtime_error("Failed to read message size.");
     }
 
-    auto prefix_size = input_stream.CurrentPosition() - initial_position;
+    auto prefix_size = input_stream.CurrentPosition() - initial_position; 
 
     if (message_size > static_cast<uint32_t>(size-1)) // в буфере нецелое сообщение
     {
-        *bytesConsumed = 0;
-        return nullptr;
+        throw std::runtime_error("The transmitted message is incomplete.");
     }
     
     // Чтение и десериализация сообщения
@@ -43,16 +37,12 @@ std::shared_ptr<Message> parseDelimited(const void* data, size_t size, size_t* b
     if (!deserialized_message->ParseFromArray(data + prefix_size, message_size)) {
         throw std::runtime_error("Failed to parse message.");
     }
-    
 
     *bytesConsumed = static_cast<size_t>(message_size) + static_cast<size_t>(prefix_size);
     std::shared_ptr<Message> mes_ptr = deserialized_message;
 
     return mes_ptr;
 };
-
-
-
 
 template<typename MessageType>
 class DelimitedMessagesStreamParser
@@ -67,15 +57,23 @@ public:
         {
             m_buffer.push_back(ch);
         }
-
-      
+        
         size_t bytesConsumed = 0;
         std::list<PointerToConstValue> messages;
         do {
-
                 m_buffer.erase(m_buffer.begin(), m_buffer.begin() + bytesConsumed); //затираем расшифрованное сообщение (длина + само сообщение)
-                messages.push_back(parseDelimited<MessageType>(static_cast<const void*>(m_buffer.data()), m_buffer.size(), &bytesConsumed));
-        } while (bytesConsumed); //пока получается расшифровать
+                try
+                {
+                    messages.push_back(parseDelimited<MessageType>(static_cast<const void*>(m_buffer.data()), m_buffer.size(), &bytesConsumed));    
+                }
+                catch(const std::exception& e)
+                {
+                    std::cout << e.what() << std::endl;
+                    bytesConsumed = 0;
+                }
+                
+                
+        } while (bytesConsumed); //пока получается расшифровывать
 
         if (!messages.back()) //чистим пустое сообщение 
             messages.pop_back();

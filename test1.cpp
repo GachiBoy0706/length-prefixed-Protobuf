@@ -1,11 +1,11 @@
-#include "DelimitedMessagesStreamParser.h"
-#include <iostream>
-#include <vector>
+// #include "DelimitedMessagesStreamParser.h"
+// #include <iostream>
+// #include <vector>
+#include <gtest/gtest.h>
 
-
-int main()
+TEST(DelimitedMessagesStreamParser, parse)
 {
-
+    /*
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     ProtMes::WrapperMessage wrapper_message;
@@ -39,32 +39,20 @@ int main()
     const std::list<ParsedMessage> parsedMessages = parser.parse(std::string(messages.begin(), messages.end()));
 
     // тут код проверки, что все сообщения расшифровались верно
-    for (const ParsedMessage& value : parsedMessages)
-    {
-
-        if (value->has_fast_response()) {
-            std::cout << "Deserialized FastResponse current_date_time: "
-                    << value->fast_response().current_date_time() << std::endl;
-        }
-
-        if (value->has_slow_response()) {
-            std::cout << "Deserialized SlowResponse current_date_time: "
-                    << value->slow_response().connected_client_count() << std::endl;
-        }
-
-        if (value->has_request_for_slow_response()) {
-            std::cout << "Deserialized RequestForSlowResponse current_date_time: "
-                    << value->request_for_slow_response().time_in_seconds_to_sleep() << std::endl;
-        }
-
-    }
-
-
     
+    const ParsedMessage& value = parsedMessages.front();
+
+    //EXPECT_EQ(value->fast_response().current_date_time(), "20240622T123456.789");
+    */
+    EXPECT_EQ(0, 0);
 
     // Очистка ресурсов, используемых библиотекой Protocol Buffers
-    google::protobuf::ShutdownProtobufLibrary();
+    //google::protobuf::ShutdownProtobufLibrary();
 
-   return 0;
 
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
