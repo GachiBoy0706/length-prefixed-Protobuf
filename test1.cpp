@@ -4,6 +4,9 @@
 #include <gtest/gtest.h>
 
 
+typedef DelimitedMessagesStreamParser<ProtMes::WrapperMessage>::PointerToConstValue ParsedMessage;
+typedef DelimitedMessagesStreamParser<ProtMes::WrapperMessage> Parser;
+
 void AddMessage(std::vector<char>& messages, ProtMes::WrapperMessage& wrapper_message)
 {
     int message_size = wrapper_message.ByteSizeLong();
@@ -20,9 +23,8 @@ void AddMessage(std::vector<char>& messages, ProtMes::WrapperMessage& wrapper_me
 
 }
 
-TEST(DelimitedMessagesStreamParser, parse)
+TEST(DelimitedMessagesStreamParser, single_complete_message)
 {
-    
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     ProtMes::WrapperMessage wrapper_message;
@@ -35,15 +37,8 @@ TEST(DelimitedMessagesStreamParser, parse)
     std::vector<char> messages;
 
     AddMessage(messages, wrapper_message);
-    
-
-    typedef DelimitedMessagesStreamParser<ProtMes::WrapperMessage> Parser;
 
     Parser parser;
-
-    // идем по одному байту по входному потоку сообщений
-
-    typedef DelimitedMessagesStreamParser<ProtMes::WrapperMessage>::PointerToConstValue ParsedMessage;
 
     const std::list<ParsedMessage> parsedMessages = parser.parse(std::string(messages.begin(), messages.end()));
 
@@ -53,15 +48,49 @@ TEST(DelimitedMessagesStreamParser, parse)
 
     EXPECT_EQ(value->fast_response().current_date_time(), "20240622T123456.789");
     
-
-    // Очистка ресурсов, используемых библиотекой Protocol Buffers
     google::protobuf::ShutdownProtobufLibrary();
-
-
 }
 
 
-//TEST()
+TEST(DelimitedMessagesStreamParser, several_complete_message)
+{
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    
+
+
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+TEST(DelimitedMessagesStreamParser, single_incomplete_message)
+{
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+
+
+
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+TEST(DelimitedMessagesStreamParser, several_incomplete_message)
+{
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+
+
+
+    google::protobuf::ShutdownProtobufLibrary();
+}
+
+TEST(DelimitedMessagesStreamParser, empty_message)
+{
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+
+
+
+    google::protobuf::ShutdownProtobufLibrary();
+}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
