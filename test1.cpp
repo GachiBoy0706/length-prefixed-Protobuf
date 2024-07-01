@@ -1,11 +1,28 @@
-// #include "DelimitedMessagesStreamParser.h"
-// #include <iostream>
-// #include <vector>
+#include "DelimitedMessagesStreamParser.h"
+#include <iostream>
+#include <vector>
 #include <gtest/gtest.h>
+
+
+void AddMessage(std::vector<char>& messages, ProtMes::WrapperMessage& wrapper_message)
+{
+    int message_size = wrapper_message.ByteSizeLong();
+
+    int prefix_size = google::protobuf::io::CodedOutputStream::VarintSize32(message_size);
+
+    int old_size = messages.size();
+    messages.resize(old_size + prefix_size + message_size);
+
+    google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(message_size, reinterpret_cast<uint8_t*>(messages.data() + old_size));
+
+    // Сериализация сообщения в массив
+    wrapper_message.SerializeToArray(messages.data() + old_size + prefix_size, message_size);
+
+}
 
 TEST(DelimitedMessagesStreamParser, parse)
 {
-    /*
+    
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     ProtMes::WrapperMessage wrapper_message;
@@ -15,17 +32,9 @@ TEST(DelimitedMessagesStreamParser, parse)
 
     wrapper_message.set_allocated_fast_response(fast_response);
 
-    int message_size = wrapper_message.ByteSizeLong();
+    std::vector<char> messages;
 
-    int prefix_size = google::protobuf::io::CodedOutputStream::VarintSize32(message_size);
-
-    std::vector<char> messages(prefix_size + message_size);
-
-    google::protobuf::io::CodedOutputStream::WriteVarint32ToArray(message_size, reinterpret_cast<uint8_t*>(messages.data()));
-
-    // Сериализация сообщения в массив
-    wrapper_message.SerializeToArray(messages.data() + prefix_size, message_size);
-
+    AddMessage(messages, wrapper_message);
     
 
     typedef DelimitedMessagesStreamParser<ProtMes::WrapperMessage> Parser;
@@ -42,15 +51,17 @@ TEST(DelimitedMessagesStreamParser, parse)
     
     const ParsedMessage& value = parsedMessages.front();
 
-    //EXPECT_EQ(value->fast_response().current_date_time(), "20240622T123456.789");
-    */
-    EXPECT_EQ(0, 0);
+    EXPECT_EQ(value->fast_response().current_date_time(), "20240622T123456.789");
+    
 
     // Очистка ресурсов, используемых библиотекой Protocol Buffers
-    //google::protobuf::ShutdownProtobufLibrary();
+    google::protobuf::ShutdownProtobufLibrary();
 
 
 }
+
+
+//TEST()
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

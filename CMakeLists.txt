@@ -18,7 +18,7 @@ set(PROTO_FILES ${CMAKE_CURRENT_SOURCE_DIR}/message.proto)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
 # Укажите исходные файлы вашего проекта
-set(MAIN_SOURCE_FILES main.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+#set(MAIN_SOURCE_FILES main.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 # Создайте исполняемый файл
 # add_executable(ProtobufExecutable ${MAIN_SOURCE_FILES})
@@ -27,14 +27,14 @@ set(MAIN_SOURCE_FILES main.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 # target_link_libraries(ProtobufExecutable ${Protobuf_LIBRARIES})
 
 # Найдите Google Test
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+ find_package(GTest REQUIRED)
+ include_directories(${GTEST_INCLUDE_DIRS})
 
 # Укажите исходные файлы для тестов
-set(TEST_SOURCE_FILES test1.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+ set(TEST_SOURCE_FILES test1.cpp ${PROTO_SRCS} ${PROTO_HDRS}) # if proto files included into test.cpp everything falls
 
 # Добавьте исполняемый файл для тестов
-add_executable(TestExecutable ${TEST_SOURCE_FILES}) #проблема вот тут возникает, если собирать чисто с test1.cpp, то все ок
+ add_executable(TestExecutable ${TEST_SOURCE_FILES}) #проблема вот тут возникает, если собирать чисто с test1.cpp, то все ок
 
 # Связать исполняемый файл для тестов с библиотеками Google Test
-target_link_libraries(TestExecutable ${GTEST_BOTH_LIBRARIES} pthread)
+ target_link_libraries(TestExecutable ${GTEST_BOTH_LIBRARIES} pthread ${Protobuf_LIBRARIES})
